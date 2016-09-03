@@ -1,89 +1,35 @@
 var _ = require('underscore');
+var util = require('./utility');
+var run = require('./run');
+var attack = require('./attack');
 
-function hasEnemy(params) {
+function handleEnemy(params) {
 	var me = params.you;
 	var enemies = params.enemies;
 	var enemy = enemies[0];
 
-	var isInLine = isEnemyInLine(me, enemy);
-	var linePosition = getEnemyLinePosition(me, enemy);
-	var 
-	
-	var isEnemyInLine = function(me, enemy){
-		if(me.x == enemy.x || me.y == enemy.y) {
-			return true;
-		}
+	var isInLine = util.isEnemyInLine(me, enemy);
+	var linePosition = util.getEnemyLinePosition(me, enemy);
 
-		return false;
-	}
+	var chaseEnemy = function(me,enemy) {
+		distToEnemy = {
+			x: me.x - enemy.x,
+			y: me.y - enemy.y
+		};
 
-	var getEnemyLinePosition = function(me, enemy) {
-		if(me.x == enemy.x) {
-			return 'vertical';
-		}
-
-		if(me.y == enemy.y) {
-			return 'horizontal';
-		}
-
-		return false;
-	}
-
-	var getStepsToFace = function(current, wanted) {
-		if(current == 'top' || current == 'bottom') {
-			if(wanted == 'left' || wanted == 'right') {
-				return 1;
-			}
-			if(wanted == current) {
-				return 0;
+		if(distToEnemy.x < 0 && me.direction == 'right') {
+			if(Math.abs(distToEnemy.x) > 1){
+				return 'forward';
 			}
 
-			return 2;
-		}
-	}
-
-	var getNextToFace = function(current, wanted) {
-		if(current == 'top') {
-			if(wanted == 'right' || wanted == 'bottom') {
-				return 'turn-right';
-			}
-			if(wanted == 'left') {
-				return 'turn-left';
+			if(
+				enemy.direction == 'bottom' && distToEnemy.y > 0
+				|| enemy.direction == 'top' && distToEnemy.y < 0)
+			{
+				return 'reverse';
 			}
 
-			return false;
-		}
-		if(current == 'left') {
-			if(wanted == 'top' || wanted == 'right') {
-				return 'turn-right';
-			}
-			if(wanted == 'bottom') {
-				return 'turn-left';
-			}
 
-			return false;
-		}
-
-		if(current == 'bottom') {
-			if(wanted == 'top' || wanted == 'left') {
-				return 'turn-right';
-			}
-			if(wanted == 'right') {
-				return 'turn-left';
-			}
-
-			return false;
-		}
-
-		if(current == 'right') {
-			if(wanted == 'bottom' || wanted == 'left') {
-				return 'turn-right';
-			}
-			if(wanted == 'top') {
-				return 'turn-left';
-			}
-
-			return false;
 		}
 	}
 
@@ -92,8 +38,8 @@ function hasEnemy(params) {
 			var enemyPosition = (me.y > enemy.y)?'top':'bottom';
 			var myPosition = (enemy.y > me.y)?'top':'bottom';
 
-			var stepsToFaceEnemy = getStepsToFace(me.direction, enemyPosition);
-			var stepsToFaceMe = getStepsToFace(enemy.direction, myPosition);
+			var stepsToFaceEnemy = util.getStepsToFace(me.direction, enemyPosition);
+			var stepsToFaceMe = util.getStepsToFace(enemy.direction, myPosition);
 
 			if(stepsToFaceEnemy < stepsToFaceMe) {
 				return 1;
@@ -101,5 +47,29 @@ function hasEnemy(params) {
 
 			return 0;
 		}
+
+		if(linePosition == 'horizontal') {
+			var enemyPosition = (me.x > enemy.x)?'left':'right';
+			var myPosition = (enemy.y > me.y)?'left':'right';
+
+			var stepsToFaceEnemy = util.getStepsToFace(me.direction, enemyPosition);
+			var stepsToFaceMe = util.getStepsToFace(enemy.direction, myPosition);
+
+			if(stepsToFaceEnemy < stepsToFaceMe) {
+				return 1;
+			}
+
+			return 0;
+		}
+
+
 	}
+
+	if(!runOrAttack(me, enemy)) {
+		return run(params);
+	}
+
+	return attack(params);
 }
+
+exports = handleEnemy;
