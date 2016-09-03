@@ -8,11 +8,12 @@
     "deploy": "claudia update"
   },
   "author": "",
-  "license": "MIT",
-  "dependencies": {
-    "claudia-api-builder": "^1.6.0"
-  },
+
   "devDependencies": {
     "claudia": "^1.7.1"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "underscore": "^1.8.3"
   }
 }
