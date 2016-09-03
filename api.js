@@ -18,7 +18,7 @@ api.post('/command', function (request) {
 		height : request.body.mapHeight
 	};
 	return {
-		command: tankMovement(request.body.you, map)
+		command: tankMovement(request.body.you, map, request.body.walls)
 	};
 });
 
